@@ -8,9 +8,9 @@ from pull_frame import pull_frame_from_cam
 CAM_IP = "192.168.1.85"
 
 FPS = 60
-STREAM_FPS = 20
+STREAM_FPS = 10
 
-CNN_MIN_CONFIDENCE = 0.3
+CNN_MIN_CONFIDENCE = 0.55
 
 def ESP32_cam_pull():
     frame = pull_frame_from_cam(CAM_IP)
@@ -36,7 +36,9 @@ def process_camera_view():
                             classes=0)
 
         annotated = results[0].plot()
+        detection_count = len(results[0])
 
+        cv2.putText(annotated, f"Person count: {detection_count}", (20, 35), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
         cv2.imshow("Image", annotated)
     
     cv2.destroyAllWindows()
@@ -69,5 +71,5 @@ def main():
     video.release()
     cv2.destroyAllWindows()
 
-#process_camera_view()
-main()
+process_camera_view()
+#main()
