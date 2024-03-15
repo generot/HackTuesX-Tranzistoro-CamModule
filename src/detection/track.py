@@ -1,6 +1,7 @@
 import cv2
 import os
 import json
+import requests
 
 import numpy as np
 import multiprocessing as mp
@@ -8,8 +9,21 @@ import multiprocessing as mp
 from ultralytics import YOLO
 from pull_frame import pull_frame_from_cam
 
+API_KEY = ""
+
 STREAM_FPS = 10
 CNN_MIN_CONFIDENCE = 0.55
+
+APP_BACKEND = "192.168.220.133"
+
+def send_attendance_data(cam_ID, dt_count):
+    resp = {
+        "cameraID": int(cam_ID),
+        "count": dt_count,
+        "apiKey": API_KEY
+    }
+
+    requests.post("https://{APP_BACKEND}:2999/api/facilities/attendance", body=resp, verify=False)
 
 def ESP32_cam_pull(cam_IP):
     frame = pull_frame_from_cam(cam_IP)
@@ -18,7 +32,7 @@ def ESP32_cam_pull(cam_IP):
 
     return decoded_image
 
-def process_camera_view(cam_IP):
+def process_camera_view(cam_IP, cam_ID):
     net = YOLO("../models/yolov8/yolov8n.pt")
 
     while True:
@@ -36,6 +50,8 @@ def process_camera_view(cam_IP):
 
         cv2.putText(annotated, f"Person count: {detection_count}", (20, 35), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
         cv2.imshow("Image", annotated)
+        send_attendance_data(cam_ID, detection_count)
+
         key = cv2.waitKey(1000 // STREAM_FPS)
 
         if key == ord('e'):
@@ -44,16 +60,28 @@ def process_camera_view(cam_IP):
     cv2.destroyAllWindows()
 
 def main():
-    conf_fl = open("./configs/conf.json")
-    ips = json.load(conf_fl)
+    conf_fl = open("./configs/conf.json", "r+")
+    conf = json.load(conf_fl)
+
+    global API_KEY
+    API_KEY = conf["api_key"]
 
     procs = []
 
-    process_camera_view(ips[0])
+    for i, ip in enumerate(conf["ip_addresses"]):
+        assigned_id = requests.get(f"http://{ip}/assignId?assigned_id={i+1}").text
 
-    for ip in ips:
-        p = mp.Process(target=process_camera_view, args=(ip,))
+        print(assigned_id)
+
+        conf["ip_addresses"][i] = (ip, assigned_id)
+
+        p = mp.Process(target=process_camera_view, args=(ip, assigned_id))
         procs.append(p)
+
+    pair = conf["ip_addresses"][0]
+
+    process_camera_view(pair[0], pair[1])
+
 '''
     for p in procs:
         p.start()
@@ -62,5 +90,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-#process_camera_view()

@@ -32,14 +32,18 @@ def create_prompts(num_prompts):
 
 def on_save():
     json_fl = open(DEF_DIR, "w+")
-    
+    dc = dict()
+
     ips = []
 
     for obj in prompts:
         if isinstance(obj, tk.Entry):
             ips.append(obj.get())
     
-    json.dump(ips, json_fl)
+    dc["api_key"] = "u9M1MviZWiqmxpI7"
+    dc["ip_addresses"] = ips
+
+    json.dump(dc, json_fl)
 
 root = tk.Tk()
 root.title("AtlasFlow Configuration Tool")
