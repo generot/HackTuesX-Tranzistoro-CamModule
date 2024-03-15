@@ -34,9 +34,6 @@ def on_image_receive(data):
 def pull_frame_from_cam(cam_IP):
     image = requests.get(f"http://{cam_IP}/getFrame")
 
-    #image_bytearr = bytes(image.content)
-    #jpeg_list = list(image_bytearr)
-
     np_arr = np.array(bytearray(image.content), dtype="uint8")
 
     return np_arr
