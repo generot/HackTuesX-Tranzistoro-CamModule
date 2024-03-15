@@ -1,10 +1,12 @@
-import network
+from network import WLAN, STA_IF    
+from webserver import webcam
+import display
 
 NET_SSID = "MartinHotspot123"
 NET_PASS = "eaah6847"
 
 def connect_to_network(_ssid, _pass):
-    station = network.WLAN(network.STA_IF)
+    station = WLAN(STA_IF)
 
     if not station.active():
         station.active(True)
@@ -27,14 +29,18 @@ def get_interface():
     return st_interface
 
 def run_application():
-    import machine
-    import socketserver
+    d = display.display_init()
     
-    from webserver import webcam
-
-    #socketserver.create_socket_server(on_connect=socketserver.on_connect_clb)
+    IP = st_interface.ifconfig()[0]
+    
+    d.fill(0)
+    display.println(d, "Module started.")
+    display.println(d, "")
+    display.println(d, "IP: ")
+    display.println(d, IP)
+    d.show()
 
     server = webcam()
-    server.run()
+    server.run(d)
     
 run_application()

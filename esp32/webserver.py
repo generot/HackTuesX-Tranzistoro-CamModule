@@ -1,43 +1,47 @@
 import gc
 import machine
 import camera
+import display
 
 from microWebSrv import MicroWebSrv
 
 class webcam():
     def __init__(self):
-        self.saturation = 0
-        self.quality = 10
-        self.brightness = 0
-        self.contrast = 0
-        self.vflip = 0
-        self.hflip = 0
-        self.framesize = camera.FRAME_XGA
+        self.framesize = camera.FRAME_SVGA
 
         self.routeHandlers = [
             ("/getFrame", "GET", self._httpSendFrame)
         ]
 
-    def run(self):
-        print("Server is running...")
-
-        res = camera.init(0, format=camera.JPEG, framesize=self.framesize, fb_location=camera.PSRAM)
-        
-        if not res:
+    def run(self, disp):
+        try:
+            camera.init(0, format=camera.JPEG, framesize=self.framesize, fb_location=camera.PSRAM)
+        except:
             camera.deinit()
             
-            res = camera.init(0, format=camera.JPEG, framesize=self.framesize, fb_location=camera.PSRAM)
-            
-            if not res:
-                #Display this error to the user somehow.
+            try:
+                camera.init(0, format=camera.JPEG, framesize=self.framesize, fb_location=camera.PSRAM)
+            except:
                 print("Camera initialization failure!")
+                
+                display.flush()
+                
+                disp.fill(0)
+                display.println(disp, "FAILURE:")
+                display.println(disp, "")
+                display.println(disp, "Camera could not")
+                display.println(disp, "be initialized.")
+                disp.show()
                 
                 return False
 
-        mws = MicroWebSrv(routeHandlers=self.routeHandlers, webPath="www/")
+        mws = MicroWebSrv(routeHandlers=self.routeHandlers)
         mws.Start(threaded=True)
+        
+        print("Server is running...")
+        
+        display.flush()
         gc.collect()
-
 
     def _httpSendFrame(self, httpClient, httpResponse):
         image = camera.capture()
