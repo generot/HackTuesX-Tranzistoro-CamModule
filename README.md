@@ -5,4 +5,6 @@ This is the official repository for the embedded part of the project of team "Tr
 ![logo](./schematics/images/scheme.png)
 
 ## Block scheme
-![logo](./schematics/images/hacktuesX.png)
+<p align="center">
+    <img src="/schematics/images/hacktuesX.png">
+</p>
