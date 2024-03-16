@@ -18,12 +18,13 @@ APP_BACKEND = "192.168.220.133"
 
 def send_attendance_data(cam_ID, dt_count):
     resp = {
-        "cameraID": int(cam_ID),
+        "cameraId": int(cam_ID),
         "count": dt_count,
         "apiKey": API_KEY
     }
 
-    requests.post("https://{APP_BACKEND}:2999/api/facilities/attendance", body=resp, verify=False)
+    res = requests.post(f"https://{APP_BACKEND}:2999/api/facilities/attendance", data=resp, verify=False)
+    print(res)
 
 def ESP32_cam_pull(cam_IP):
     frame = pull_frame_from_cam(cam_IP)
