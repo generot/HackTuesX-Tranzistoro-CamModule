@@ -8,3 +8,6 @@ This is the official repository for the embedded part of the project of team "Tr
 <p align="center">
     <img src="/schematics/images/hacktuesX.png">
 </p>
+
+## Module Layout
+![logo](./schematics/images/breadboard.jpg)
