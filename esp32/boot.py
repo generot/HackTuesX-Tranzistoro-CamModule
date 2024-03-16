@@ -6,9 +6,6 @@ import json
 conf_file = open("config.json")
 configs = json.load(conf_file)
 
-NET_SSID = "MartinHotspot123"
-NET_PASS = "eaah6847"
-
 def connect_to_network(_ssid, _pass):
     station = WLAN(STA_IF)
 
